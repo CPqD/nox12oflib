@@ -1,0 +1,60 @@
+NOX 1.2 Oflib
+-------------
+
+This is an OpenFlow 1.2 [1] compatible version of the NOX controller.
+The code is based on Nicira's NOX Zaku controller [2], with
+OpenFlow proecessing being replaced with Oflib from the OpenFlow 1.2 Software
+Switch [3]. The controller only supports C++ applications (no Python).
+
+[1] https://www.opennetworking.org/images/stories/downloads/specification/openflow-spec-v1.2.pdf
+[2] http://noxrepo.org/cgi-bin/gitweb.cgi?p=nox;a=tree;h=8479a2d595e960d0953c4517b3a54be8fbc316b6;hb=8479a2d595e960d0953c4517b3a54be8fbc316b6
+[3] https://github.com/CPqD/of12softswitch
+
+
+Getting Started
+---------------
+
+To build, run the following commands in the of11softswitch directory:
+
+    ./boot.sh
+    mkdir build
+    ../configure
+    make
+
+
+To start the controller, run the following commands:
+
+    cd build/src
+    ./nox-core -i ptcp:<port> [applications]
+
+This will start the controller, listening on the given port for switch
+connetions. For a complete list of options, use the --help argument.
+
+
+Contribute
+----------
+
+Please submit your bug reports, fixes and suggestions as pull requests on
+github, or by contacting us directly.
+
+
+License
+-------
+
+NOX code is released under the GNU General Public license.
+Oflib itself is released under the BSD license.
+
+
+References
+----------
+
+[1] OpenFlow: http://www.openflow.org/
+[2] ONF:      http://www.opennetworkingfoundation.org/
+
+
+Contact
+-------
+
+E-mail: Eder Leão Fernandes(ederlf@cpqd.com.br)  
+
+Repo:   https://github.com/CPqD/nox12:oflib
