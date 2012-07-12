@@ -18,14 +18,12 @@
 #define OX_MATCH_H 1
 
 #include <stdint.h>
-#include <map>
-#include <string>
 #include <sys/types.h>
 #include <netinet/in.h>
-#include "../libc/ofpbuf.h"
-#include "../libc/hmap.h"
-#include "../libc/packets.h"
-#include "ofl-structs.h"
+#include "ofpbuf.h"
+#include "hmap.h"
+#include "packets.h"
+#include "../oflib/ofl-structs.h"
 
 
 #define OXM_HEADER__(VENDOR, FIELD, HASMASK, LENGTH) \
@@ -243,8 +241,6 @@
 /* IPv4 TTL */
 #define OXM_OF_IPV4_TTL OXM_HEADER (0x0002, 81, 1)
 
-/*Defined in oxm-match.c*/ 
-extern std::map<std::string,std::pair<int,int> > fields;
 
 int 
 oxm_pull_match(struct ofpbuf * buf, struct ofl_match *match_dst, int match_len);

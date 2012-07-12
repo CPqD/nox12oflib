@@ -269,16 +269,39 @@ ofl_actions_unpack(struct ofp_action_header *src, size_t *len, struct ofl_action
         case OFPAT_SET_FIELD: {
             struct ofp_action_set_field *sa;
             struct ofl_action_set_field *da;
+            uint8_t *value;
             
             sa = (struct ofp_action_set_field*) src;
             da = (struct ofl_action_set_field *)malloc(sizeof(struct ofl_action_set_field));
             da->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
             
             memcpy(&da->field->header,sa->field,4);
-            
-            uint8_t *value = (uint8_t *) src + sizeof (struct ofp_action_set_field);
-            da->field->value = (uint8_t*) malloc(OXM_LENGTH(da->field->header));
-            memcpy(da->field->value , value, OXM_LENGTH(da->field->header));
+            da->field->header = ntohl(da->field->header);
+            value = (uint8_t *) src + sizeof (struct ofp_action_set_field);
+            da->field->value = malloc(OXM_LENGTH(da->field->header));
+            switch(OXM_LENGTH(da->field->header)){
+                case 1:
+                case 6:
+                case 16:
+                    memcpy(da->field->value , value, OXM_LENGTH(da->field->header));
+                    break;
+                
+                case 2:{
+                   uint16_t v = ntohs(*((uint16_t*) value));
+                   memcpy(da->field->value , &v, OXM_LENGTH(da->field->header));
+                    break;
+                }
+                case 4:{
+                    uint32_t v = htonl(*((uint32_t*) value));
+                    memcpy(da->field->value , &v, OXM_LENGTH(da->field->header));
+                    break;
+                }
+                case 8:{
+                    uint64_t v = hton64(*((uint64_t*) value));
+                    memcpy(da->field->value , &v, OXM_LENGTH(da->field->header));
+                    break;
+                }                
+            }
      	    *len -= ROUND_UP(ntohs(src->len),8);
      	    *dst = (struct ofl_action_header *)da;
             break;

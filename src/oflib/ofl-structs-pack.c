@@ -33,7 +33,7 @@
 #include <string.h>
 #include <netinet/in.h>
 
-#include "openflow/openflow.h"
+#include "include/openflow/openflow.h"
 #include "oxm-match.h"
 #include "ofl.h"
 #include "ofl-actions.h"
@@ -92,6 +92,7 @@ ofl_structs_instructions_pack(struct ofl_instruction_header *src, struct ofp_ins
     
     dst->type = htons(src->type);
     memset(dst->pad, 0x00, 4);
+    
     switch (src->type) {
         case OFPIT_GOTO_TABLE: {
             struct ofl_instruction_goto_table *si = (struct ofl_instruction_goto_table *)src;
@@ -124,6 +125,7 @@ ofl_structs_instructions_pack(struct ofl_instruction_header *src, struct ofp_ins
             struct ofp_instruction_actions *di = (struct ofp_instruction_actions *)dst;
 
             total_len = sizeof(struct ofp_instruction_actions) + ofl_actions_ofp_total_len(si->actions, si->actions_num, exp);
+
             di->len = htons(total_len);
             memset(di->pad, 0x00, 4);
             data = (uint8_t *)dst + sizeof(struct ofp_instruction_actions);
@@ -255,13 +257,12 @@ ofl_structs_flow_stats_pack(struct ofl_flow_stats *src, uint8_t *dst, struct ofl
     flow_stats->byte_count = hton64(src->byte_count);
     data = (dst) + sizeof(struct ofp_flow_stats) - 4;
     
-    ofl_structs_match_pack(src->match, &(flow_stats->match), data, exp);
+    ofl_structs_match_pack(src->match, &(flow_stats->match), data, HOST_ORDER, exp);
     data = (dst) + ROUND_UP(sizeof(struct ofp_flow_stats) -4 + src->match->length, 8);  
     
     for (i=0; i < src->instructions_num; i++) {
         data += ofl_structs_instructions_pack(src->instructions[i], (struct ofp_instruction *) data, exp);
     }
-    struct ofp_flow_stats *f = (struct ofp_flow_stats *) dst;
     return total_len;
 }
 
@@ -362,10 +363,10 @@ ofl_structs_queue_prop_ofp_len(struct ofl_queue_prop_header *prop) {
             return sizeof(struct ofp_queue_prop_min_rate);
         }
         case OFPQT_MAX_RATE:{
-            return 0;
+           return sizeof(struct ofp_queue_prop_max_rate);
         }
         case OFPQT_EXPERIMENTER:{
-            return 0;
+           return sizeof(struct ofp_queue_prop_experimenter);
         }
     }
     return 0;
@@ -390,10 +391,22 @@ ofl_structs_queue_prop_pack(struct ofl_queue_prop_header *src,
             return sizeof(struct ofp_queue_prop_min_rate);
         }
         case OFPQT_MAX_RATE:{
-            return 1;
+            struct ofl_queue_prop_max_rate *sp = (struct ofl_queue_prop_max_rate *)src;
+            struct ofp_queue_prop_max_rate *dp = (struct ofp_queue_prop_max_rate *)dst;
+            dp->prop_header.len = htons(sizeof(struct ofp_queue_prop_max_rate));
+            dp->rate            = htons(sp->rate);
+            memset(dp->pad, 0x00, 6);
+
+            return sizeof(struct ofp_queue_prop_max_rate);
         }
         case OFPQT_EXPERIMENTER:{
-            return 1;
+            struct ofl_queue_prop_experimenter *sp = (struct ofl_queue_prop_experimenter *)src;
+            struct ofp_queue_prop_experimenter *dp = (struct ofp_queue_prop_experimenter*)dst;
+            dp->prop_header.len = htons(sizeof(struct ofp_queue_prop_experimenter));
+            memset(dp->pad, 0x00, 4);
+            /*TODO Eder: How to copy without a know len?? */
+            //dp->data = sp->data;
+            return sizeof(struct ofp_queue_prop_experimenter);
         }
         default: {
             return 0;
@@ -401,7 +414,6 @@ ofl_structs_queue_prop_pack(struct ofl_queue_prop_header *src,
     }
 
 }
-
 
 size_t
 ofl_structs_packet_queue_ofp_total_len(struct ofl_packet_queue ** queues,
@@ -540,7 +552,7 @@ ofl_structs_match_ofp_len(struct ofl_match_header *match, struct ofl_exp *exp) {
 }
 
 size_t
-ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint8_t* oxm_fields, struct ofl_exp *exp) {
+ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint8_t* oxm_fields, enum byte_order order, struct ofl_exp *exp) {
     switch (src->type) {
         case (OFPMT_OXM): {
             struct ofl_match *m = (struct ofl_match *)src;
@@ -550,7 +562,9 @@ ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint
             oxm_fields = (uint8_t*) &dst->oxm_fields;
             dst->length = htons(sizeof(struct ofp_match));
             if (src->length){
-                oxm_len = oxm_put_match(b, m);
+                if (order == HOST_ORDER)
+                    oxm_len = oxm_put_match(b, m);
+                else oxm_len = oxm_put_packet_match(b,m);
                 memcpy(oxm_fields, (uint8_t*) ofpbuf_pull(b,oxm_len), oxm_len);
                 dst->length = htons(oxm_len + ((sizeof(struct ofp_match )-4)));
                 ofpbuf_delete(b);

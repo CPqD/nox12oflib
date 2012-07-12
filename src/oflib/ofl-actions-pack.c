@@ -194,11 +194,39 @@ ofl_actions_pack(struct ofl_action_header *src, struct ofp_action_header *dst, u
         case OFPAT_SET_FIELD: {
             struct ofl_action_set_field *sa = (struct ofl_action_set_field *) src;
             struct ofp_action_set_field *da = (struct ofp_action_set_field *) dst;
-
+            uint32_t header;
+            uint8_t padding_size;
+                        
             da->len = htons(sizeof(struct ofp_action_set_field) + ROUND_UP(OXM_LENGTH(sa->field->header),8));
             /*Put OXM header in the field*/
-            memcpy(&da->field, &sa->field->header, 4);            
-            memcpy(data + (sizeof(struct ofp_action_set_field)), sa->field->value,OXM_LENGTH(sa->field->header));
+            header = htonl(sa->field->header);
+            memcpy(&da->field, &header, 4);
+            switch (OXM_LENGTH(sa->field->header)){
+                case 1:
+                case 6:
+                case 16:
+                    memcpy(data + (sizeof(struct ofp_action_set_field)), sa->field->value,OXM_LENGTH(sa->field->header));
+                    break;
+                
+                case 2:{
+                   uint16_t value = htons(*((uint16_t*) sa->field->value));
+                   memcpy(data + (sizeof(struct ofp_action_set_field)),&value,OXM_LENGTH(sa->field->header));
+                    break;
+                }
+                case 4:{
+                    uint32_t value = htons(*((uint32_t*) sa->field->value));
+                    memcpy(data + (sizeof(struct ofp_action_set_field)),&value,OXM_LENGTH(sa->field->header));
+                    break;
+                }
+                case 8:{
+                    uint64_t value = htons(*((uint64_t*) sa->field->value));
+                    memcpy(data + (sizeof(struct ofp_action_set_field)),&value,OXM_LENGTH(sa->field->header));
+                    break;
+                }
+            }
+            /*padding*/
+            padding_size = ROUND_UP(OXM_LENGTH(sa->field->header),8) - OXM_LENGTH(sa->field->header);
+            memset(data + (sizeof(struct ofp_action_set_field) + OXM_LENGTH(sa->field->header)), 0, padding_size);            
             return ntohs((da->len));
         
         }

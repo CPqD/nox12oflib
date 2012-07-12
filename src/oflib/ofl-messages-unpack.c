@@ -448,11 +448,12 @@ ofl_msg_unpack_flow_mod(struct ofp_header *src,uint8_t* buf, size_t *len, struct
     dm->flags =        ntohs( sm->flags);
     
     match_pos = sizeof(struct ofp_flow_mod) - 4;
-    error = ofl_structs_match_unpack(&(sm->match),buf + match_pos, len, &(dm->match), exp);
+    error = ofl_structs_match_unpack(&(sm->match), buf + match_pos, len, &(dm->match), exp);
     if (error) {
         free(dm);
         return error;
     }
+    
     error = ofl_utils_count_ofp_instructions((struct ofp_instruction *)(buf + ROUND_UP(match_pos + dm->match->length,8)), *len, &dm->instructions_num);
     if (error) {
         ofl_structs_free_match(dm->match, exp);
@@ -634,8 +635,7 @@ ofl_msg_unpack_stats_request_flow(struct ofp_stats_request *os,uint8_t* buf, siz
     dm->cookie = ntoh64(sm->cookie);
     dm->cookie_mask = ntoh64(sm->cookie_mask);
 
-     match_pos = sizeof(struct ofp_stats_request) + sizeof(struct ofp_flow_stats_request) - 4;
-
+    match_pos = sizeof(struct ofp_stats_request) + sizeof(struct ofp_flow_stats_request) - 4;
     error = ofl_structs_match_unpack(&(sm->match),buf + match_pos, len, &(dm->match), exp);
     if (error) {
         free(dm);
@@ -781,6 +781,10 @@ ofl_msg_unpack_stats_request(struct ofp_header *src,uint8_t *buf, size_t *len, s
     case OFPST_GROUP_DESC: {
         error = ofl_msg_unpack_stats_request_empty(os, len, msg);
         break;
+    }
+    case OFPST_GROUP_FEATURES:{
+        error = ofl_msg_unpack_stats_request_empty(os, len, msg);
+        break;    
     }
     case OFPST_EXPERIMENTER: {
         if (exp == NULL || exp->stats == NULL || exp->stats->reply_unpack == NULL) {
@@ -1063,6 +1067,31 @@ ofl_msg_unpack_stats_reply_group_desc(struct ofp_stats_reply *os, size_t *len, s
 }
 
 static ofl_err
+ofl_msg_unpack_stats_reply_group_features(struct ofp_stats_reply *os, size_t *len, struct ofl_msg_header **msg) {
+    struct ofp_group_features_stats *sm;
+    struct ofl_msg_stats_reply_group_features *dm;
+    int i;
+    if (*len < sizeof(struct ofp_group_features_stats)) {
+        OFL_LOG_WARN(LOG_MODULE, "Received OFPST_GROUP_FEATURES stats reply has invalid length (%zu).", *len);
+        return ofl_error(OFPET_BAD_REQUEST, OFPBRC_BAD_LEN);
+    }
+    *len -= sizeof(struct ofp_group_features_stats);
+
+    sm = (struct ofp_desc_stats *)os->body;
+    dm = (struct ofl_msg_stats_reply_group_features *)malloc(sizeof(struct ofl_msg_stats_reply_group_features));
+    
+    dm->types = ntohl(sm->types);
+    dm->capabilities = ntohl(sm->capabilities);
+    for(i = 0; i < 4; i++){
+        dm->max_groups[i] = ntohl(sm->max_groups[i]);
+        dm->actions[i] = ntohl(sm->actions[i]);
+    }
+
+    *msg = (struct ofl_msg_header *)dm;
+    return 0;
+}
+
+static ofl_err
 ofl_msg_unpack_stats_reply(struct ofp_header *src, uint8_t *buf, size_t *len, struct ofl_msg_header **msg, struct ofl_exp *exp) {
     struct ofl_msg_stats_reply_header *ofls;
     struct ofp_stats_reply *os;
@@ -1107,6 +1136,10 @@ ofl_msg_unpack_stats_reply(struct ofp_header *src, uint8_t *buf, size_t *len, st
     }
     case OFPST_GROUP_DESC: {
         error = ofl_msg_unpack_stats_reply_group_desc(os, len, msg, exp);
+        break;
+    }
+    case OFPST_GROUP_FEATURES:{
+        error = ofl_msg_unpack_stats_reply_group_features(os, len, msg);
         break;
     }
     case OFPST_EXPERIMENTER: {

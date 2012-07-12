@@ -37,6 +37,7 @@
 #include "ofl-actions.h"
 #include "ofl-utils.h"
 #include "ofl-log.h"
+#include "hmap.h"
 #include "openflow/openflow.h"
 
 #define UNUSED __attribute__((__unused__))
@@ -53,8 +54,8 @@ ofl_utils_count_ofp_instructions(void *data, size_t data_len, size_t *count) {
 
     d = (uint8_t *)data;
     *count = 0;
-    
     /* this is needed so that buckets are handled correctly */
+    
     while (data_len >= sizeof(struct ofp_instruction)) {
         inst = (struct ofp_instruction *)d;
         if (data_len < ntohs(inst->len) || ntohs(inst->len) < sizeof(struct ofp_instruction)) {
@@ -347,3 +348,5 @@ ofl_structs_free_match(struct ofl_match_header *match, struct ofl_exp *exp) {
         }
     }
 }
+
+
