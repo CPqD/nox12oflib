@@ -20,7 +20,7 @@
 
 //#include "openflow-pack-raw.hh"
 #include "buffer.hh"
-#include "xtoxll.h"
+#include "../libc/byte-order.h"
 #include <boost/shared_array.hpp>
 #include <stdlib.h>
 #include <string.h>

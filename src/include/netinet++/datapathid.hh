@@ -25,7 +25,7 @@
 #include <ostream>
 
 #include "hash_map.hh" // hash fn defined at end of file
-#include "xtoxll.h"
+#include "../libc/byte-order.h" 
 #include <string.h>
 
 namespace vigil {

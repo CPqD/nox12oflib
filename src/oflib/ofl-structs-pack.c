@@ -33,7 +33,7 @@
 #include <string.h>
 #include <netinet/in.h>
 
-#include "include/openflow/openflow.h"
+#include "../include/openflow/openflow.h"
 #include "oxm-match.h"
 #include "ofl.h"
 #include "ofl-actions.h"

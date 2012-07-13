@@ -48,7 +48,7 @@
 #include <string>
 #include <netinet/in.h>
 #include <stdint.h>
-#include "xtoxll.h"
+#include "../libc/byte-order.h"
 #include "hash_map.hh" // hash fn defined at end of file
 
 namespace vigil {

@@ -40,8 +40,9 @@
 #include "ofl.h"
 #include "ofl-actions.h"
 #include "ofl-packets.h"
-#include "../lib/hmap.h"
-#include "../lib/byte-order.h"
+#include "../libc/hmap.h"
+#include "../libc/hash.h"
+#include "../libc/byte-order.h"
 
 
 struct ofl_exp;
@@ -265,6 +266,33 @@ struct ofl_group_desc_stats {
     struct ofl_bucket **buckets;
 };
 
+/* 
+* Hackish solution for a generic put match
+*
+*/
+template <typename T>
+void ofl_structs_match_put(struct ofl_match *match, uint32_t header, T value){
+    struct ofl_match_tlv *m = (struct ofl_match_tlv *) malloc(sizeof (struct ofl_match_tlv));
+    int len = sizeof(value);
+    m->header = header;
+    m->value = (uint8_t*) malloc(len);
+    memcpy(m->value, &value, len);
+    hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
+    match->header.length += len + 4;
+}
+
+template <typename T>
+void ofl_structs_match_put_masked(struct ofl_match *match, uint32_t header, T value, T mask){
+    struct ofl_match_tlv *m = (struct ofl_match_tlv *) malloc(sizeof (struct ofl_match_tlv));
+    int len = sizeof(value);
+    
+    m->header = header;
+    m->value = (uint8_t*) malloc(len*2);
+    memcpy(m->value, &value, len);
+    memcpy(m->value + len, &mask, len);
+    hmap_insert(&match->match_fields,&m->hmap_node, hash_int(header, 0));
+    match->header.length += len * 2 + 4;
+}
 
 /****************************************************************************
  * Utility functions to match structure

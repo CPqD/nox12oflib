@@ -278,7 +278,7 @@ ofl_actions_unpack(struct ofp_action_header *src, size_t *len, struct ofl_action
             memcpy(&da->field->header,sa->field,4);
             da->field->header = ntohl(da->field->header);
             value = (uint8_t *) src + sizeof (struct ofp_action_set_field);
-            da->field->value = malloc(OXM_LENGTH(da->field->header));
+            da->field->value = (uint8_t*) malloc(OXM_LENGTH(da->field->header));
             switch(OXM_LENGTH(da->field->header)){
                 case 1:
                 case 6:

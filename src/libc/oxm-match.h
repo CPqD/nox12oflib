@@ -20,9 +20,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <netinet/in.h>
-#include "ofpbuf.h"
-#include "hmap.h"
-#include "packets.h"
+#include "../libc/ofpbuf.h"
+#include "../libc/hmap.h"
+#include "../libc/packets.h"
 #include "../oflib/ofl-structs.h"
 
 
