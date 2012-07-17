@@ -10,6 +10,14 @@ Switch [3]. The controller only supports C++ applications (no Python).
 [2] http://noxrepo.org/cgi-bin/gitweb.cgi?p=nox;a=tree;h=8479a2d595e960d0953c4517b3a54be8fbc316b6;hb=8479a2d595e960d0953c4517b3a54be8fbc316b6
 [3] https://github.com/CPqD/of12softswitch
 
+Pre-requisites
+---------------
+NOX dependencies are listed in this page  
+https://github.com/noxrepo/nox-classic/wiki/Dependencies
+
+The code was compiled and tested under an Ubuntu 11.10. 
+To compile it in a later version you should downgrade almost every dependency, so
+we recommend, while the code isn't updated, to use an older system version.
 
 Getting Started
 ---------------
