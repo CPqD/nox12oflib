@@ -20,19 +20,19 @@
 
 #include <netinet/icmp6.h>
 #include "boost/assign.hpp"
-#include "../libc/hmap.h"
-#include "../libc/hash.h"
-#include "../libc/ofpbuf.h"
-#include "../libc/byte-order.h"
-#include "../libc/packets.h"
-#include "../libc/ofpbuf.h"
-#include "../libc/unaligned.h"
+#include "../libopenflow/hmap.h"
+#include "../libopenflow/hash.h"
+#include "../libopenflow/ofpbuf.h"
+#include "../libopenflow/byte-order.h"
+#include "../libopenflow/packets.h"
+#include "../libopenflow/ofpbuf.h"
+#include "../libopenflow/unaligned.h"
 #include "ofl-structs.h"
 #include "ofl-utils.h"
 #include "../include/openflow/openflow.h"
 
 #define LOG_MODULE VLM_oxm_match
-#include "../libc/vlog.h"
+#include "../libopenflow/vlog.h"
 
 using namespace boost::assign;
 

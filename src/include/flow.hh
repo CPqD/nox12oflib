@@ -28,7 +28,6 @@
 //#include "openflow-pack-raw.hh"
 #include "../oflib/ofl-structs.h"
 #include "../oflib/oxm-match.h"
-#include "../libc/hash.h"
 
 namespace vigil {
 

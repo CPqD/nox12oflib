@@ -40,9 +40,9 @@
 #include "ofl.h"
 #include "ofl-actions.h"
 #include "ofl-packets.h"
-#include "../libc/hmap.h"
-#include "../libc/hash.h"
-#include "../libc/byte-order.h"
+#include "../libopenflow/hmap.h"
+#include "../libopenflow/hash.h"
+#include "../libopenflow/byte-order.h"
 
 
 struct ofl_exp;

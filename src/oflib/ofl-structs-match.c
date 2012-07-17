@@ -30,7 +30,7 @@
  */
 
 #include "ofl-structs.h"
-#include "../libc/hash.h"
+#include "../libopenflow/hash.h"
 #include "oxm-match.h"
 //#include "../nbee_link/nbee_link.h"
 

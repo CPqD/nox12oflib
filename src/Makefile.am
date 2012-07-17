@@ -6,7 +6,7 @@ EXTRA_DIST =	\
 	LICENSE								\
 	builtin/components.xsd						\
 	builtin/nox.xsd
-SUBDIRS =  libc oflib-exp oflib include  lib builtin nox utilities tests etc
+SUBDIRS =  libopenflow oflib-exp oflib include  lib builtin nox utilities tests etc
 
 bin_PROGRAMS = nox_core
 pkglib_LTLIBRARIES =
