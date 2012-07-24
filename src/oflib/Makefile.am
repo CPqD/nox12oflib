@@ -29,7 +29,7 @@ liboflib_la_SOURCES = \
 	ofl-structs-unpack.c \
 	ofl-utils.h
 
-liboflib_la_LIBADD = ../libc/libopenflow.la
+liboflib_la_LIBADD = ../libopenflow/libopenflow.la
 
 AM_CPPFLAGS += -xc++ -DOFL_LOG_VLOG_CC
 
